@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.json({ extended: true, limit: "10mb" }));
 
 function enemy() {
-  io.emit("enemy", true);
+  io.emit("Enemy", true);
 }
 
 (function loop() {

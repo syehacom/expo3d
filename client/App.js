@@ -33,7 +33,7 @@ export default function App() {
     // サーバーのアドレス
     const socket = io("http://<IPv4アドレス>:3000");
     // サーバーからランダムな値を受け取り変数darumaにセット
-    socket.on("enemy", (data) => {
+    socket.on("Enemy", (data) => {
       // 敵キャラクターを読み込む前にtrueとなっているためfalseにセットしなおす
       setDaruma(false);
       // サーバーから受け取ったtrueをセット
