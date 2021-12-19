@@ -1,0 +1,25 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject"
+  },
+  "author": "syeha",
+  "license": "MIT",
+  "dependencies": {
+    "expo": "~42.0.1",
+    "expo-asset": "~8.3.3",
+    "expo-gl": "^10.4.2",
+    "expo-three": "^6.0.1",
+    "gsap": "^3.6.0",
+    "react": "^18.0.0-rc.0",
+    "react-dom": "~16.13.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
+    "socket.io-client": "^4.4.0",
+    "three": "0.132.0"
+  },
+  "private": true
+}
