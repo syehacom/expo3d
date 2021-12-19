@@ -18,23 +18,25 @@ import io from "socket.io-client";
 
 export default function App() {
   const [cameras, setCameras] = useState(null);
-  const [modelsA, setModelsA] = useState(null); // 3Dモデルをセットする変数
-  const [walkA, setWalkA] = useState(true); // アニメーションをセットする変数
-  const [modelsB, setModelsB] = useState(null);
-  const [walkB, setWalkB] = useState(true);
-  const [modelsC, setModelsC] = useState(null);
-  const [walkC, setWalkC] = useState(true);
-  const [action, setAction] = useState({ z: 0, x: 0 });
-  const [daruma, setDaruma] = useState(false);
-  const [stare, setStare] = useState(false);
+  const [modelsA, setModelsA] = useState(null); // 自身の3Dモデルをセットする変数
+  const [walkA, setWalkA] = useState(true); // 自身のアニメーションをセットする変数
+  const [modelsB, setModelsB] = useState(null); // 相手の3Dモデルをセットする変数
+  const [walkB, setWalkB] = useState(true); // 相手のアニメーションをセットする変数
+  const [modelsC, setModelsC] = useState(null); // 敵の3Dモデルをセットする変数
+  const [walkC, setWalkC] = useState(true); // 敵のアニメーションをセットする変数
+  const [action, setAction] = useState({ z: 0, x: 0 }); // 自身のキャラクターの座標をセットする変数
+  const [daruma, setDaruma] = useState(false); // サーバーから受信したかどうかをセットする変数
+  const [stare, setStare] = useState(false); // 自身のキャラクターが動いたらアウトになるタイミングの変数
   const socketRef = useRef();
 
   useEffect(() => {
     // サーバーのアドレス
-    const socket = io("＜サーバーのアドレス＞");
+    const socket = io("http://<IPv4アドレス>:3000");
     // サーバーからランダムな値を受け取り変数darumaにセット
     socket.on("enemy", (data) => {
+      // 敵キャラクターを読み込む前にtrueとなっているためfalseにセットしなおす
       setDaruma(false);
+      // サーバーから受け取ったtrueをセット
       setDaruma(data);
     });
     return () => socket.disconnect();
@@ -42,7 +44,7 @@ export default function App() {
 
   useEffect(() => {
     // サーバーのアドレス
-    const socket = io("＜サーバーのアドレス＞");
+    const socket = io("http://<IPv4アドレス>:3000");
     // 接続されたときにFromAPIから座標と回転、歩いているか否かの値を受け取る
     socket.on("connect", () => {
       socket.on("FromAPI", (data) => {
@@ -75,14 +77,14 @@ export default function App() {
   };
 
   const walk = () => {
-    // 自分のキャラクターとカメラの視点を同時に座標移動させて三人称視点にする
+    // 自身のキャラクターとカメラの視点を同時に座標移動させて三人称視点にする
     TweenMax.set([modelsA.position, cameras.position], {
       z: `+= ${action.z}`,
       x: `+= ${action.x}`,
     });
     // Math.atan2で算出したradianに1.5を加算し前後左右にいい感じで向くようにする
     modelsA.rotation.y = Math.atan2(-action.z, action.x) + 1.5;
-    // サーバーに自分のキャラクターの座標と回転、歩いているか否かの値をsend関数に渡す
+    // サーバーに自身のキャラクターの座標と回転、歩いているか否かの値をsend関数に渡す
     send({
       x: modelsA.position.x,
       y: modelsA.rotation.y,
@@ -101,7 +103,7 @@ export default function App() {
       TweenMax.set(modelsA.position, {
         x: 0,
         y: 0,
-        z: 25,
+        z: 25, // 中心より手前に初期座標を設定
       });
       TweenMax.set(cameras.position, {
         x: 0,
@@ -121,7 +123,7 @@ export default function App() {
   const end = () => {
     // アニメーションをストップ
     walkA.paused = true;
-    // ストップした時の自分のキャラクターの座標と回転、歩いているか否かの値をsend関数に渡す
+    // ストップした時の自身のキャラクターの座標と回転、歩いているか否かの値をsend関数に渡す
     send({
       x: modelsA.position.x,
       y: modelsA.rotation.y,
@@ -130,21 +132,26 @@ export default function App() {
     });
   };
   useEffect(() => {
+    //darumaがtrueであれば下記を実行する
     if (daruma) {
       if (modelsC !== null) {
+        // アニメーション開始
         walkC.play();
         setTimeout(() => {
           setStare(true);
         }, 500);
       }
       setTimeout(() => {
+        // 2500ミリ秒後にリセット
         if (modelsC !== null) {
           setDaruma(false);
           setStare(false);
+          // アニメーション停止
           walkC.stop();
         }
       }, 2500);
     }
+    //変数darumaが変化する度に反応する
   }, [daruma]);
 
   return (
@@ -163,7 +170,7 @@ export default function App() {
             scene.add(new GridHelper(100, 100)); //グリッドを表示
             // GLTFをロードする
             const loader = new GLTFLoader();
-            // 自分のキャラクターを設置
+            // 自身のキャラクターを設置
             const assetA = Asset.fromModule(require("./assets/testA.glb"));
             await assetA.downloadAsync();
             let mixerA;
@@ -181,7 +188,7 @@ export default function App() {
                 let animation = animations[0];
                 // アニメーションを変数walkにセット
                 setWalkA(mixerA.clipAction(animation));
-                // test.glbを3D空間に追加
+                // testA.glbを3D空間に追加
                 scene.add(modelA);
                 setModelsA(modelA);
               },
@@ -210,7 +217,7 @@ export default function App() {
                 let animation = animations[0];
                 // アニメーションを変数walkにセット
                 setWalkB(mixerB.clipAction(animation));
-                // test.glbを3D空間に追加;
+                // testB.glbを3D空間に追加;
                 scene.add(modelB);
                 setModelsB(modelB);
               },
@@ -239,7 +246,7 @@ export default function App() {
                 let animation = animations[0];
                 // アニメーションを変数walkにセット
                 setWalkC(mixerC.clipAction(animation));
-                // test.glbを3D空間に追加;
+                // testC.glbを3D空間に追加;
                 scene.add(modelC);
                 setModelsC(modelC);
               },
@@ -271,7 +278,7 @@ export default function App() {
             const render = () => {
               requestAnimationFrame(render); // アニメーション　moveUd関数、moveLr関数でカメラ座標が移動
               renderer.render(scene, camera); // レンダリング
-              //Animation Mixerを自分と相手ともに実行
+              //Animation Mixerを自分と相手と敵ともに実行
               if (mixerA) {
                 mixerA.update(clockA.getDelta());
               }
