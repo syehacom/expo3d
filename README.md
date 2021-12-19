@@ -2,7 +2,7 @@
 Qiita React Native Advent Calendar 2021<br>
 Please feel free to clone this :)
 
-※expo-three issue#196
+Please check expo-three issue#196<br>
 // _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
 // _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
 // _gl.pixelStorei(_gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, _gl.NONE);
